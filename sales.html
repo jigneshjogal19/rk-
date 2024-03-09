@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://kit.fontawesome.com/35e165882d.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Sales - Order</title>
+</head>
+
+<body>
+  <div class="container my-5">
+    <div class="col-md-6 mx-auto">
+      <div class="card">
+        <div class="container">
+          <div class="text-header text-center">
+            <h5 class="mb-1 py-3"><strong>Drop us Order Information</strong></h5>
+            <h6 class="text-muted">We are here for you! Order</h6>
+          </div>
+          <div class="alert alert-info alert-dismissible fade show" role="alert" style="display: none;">
+            <strong>Your Information has been sent <i class="far fa-smile-wink"></i></strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <form id="control-form">
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="SalesmenName">Enter Salesmen Name</label>
+                <input type="text" id="SalesmenName" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="Route">Enter Route</label>
+                <input type="text" id="Route" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="TownName">Enter Town Name</label>
+                <input type="text" id="TownName" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="ShopName">Enter Shop Name</label>
+                <input type="text" id="ShopName" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="Item">Select Item</label>
+                <select id="Item" class="form-control" required>
+                  <option value="default">Select item from the options</option>
+                  <option value="kkt">KKT</option>
+                  <option value="50 Gram Blue">50 Gm Blue</option>
+                  <option value="50 Gram">50 Gm</option>
+                  <option value="200 Gram">200 Gm</option>
+                  <option value="500 Gram">500 Gm</option>
+                  <option value="Zuban">Zuban</option>
+                  <option value="Mezban Mini">Mezban Mini</option>
+                  <option value="Mava">Mava</option>
+                </select>
+                <small id="emailHelp" class="form-text text-muted">Choose your way of going.</small>
+              </div>
+            </div>
+
+            <!-- Camera Capture Integration -->
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="CameraCapture">Take a Picture</label>
+                <canvas id="cameraCanvas"></canvas>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group mx-5 col-md-8">
+                <label for="OrderQuantity">Enter Order quantity</label>
+                <input type="number" id="OrderQuantity" class="form-control" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mb-3">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-database.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1v8xWG6-qOB9Y9HUJfL3NDeCCk_OqVoI",
+      authDomain: "rk-project-database.firebaseapp.com",
+      databaseURL: "https://rk-project-database-default-rtdb.firebaseio.com",
+      projectId: "rk-project-database",
+      storageBucket: "rk-project-database.appspot.com",
+      messagingSenderId: "240600994808",
+      appId: "1:240600994808:web:594479d5792a1b8ed57c0d",
+      measurementId: "G-HQB9WH65MF"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Create firebase database
+    let salesmenRef = firebase.database().ref("order-route");
+
+    // Listening for form submit
+    document.getElementById("control-form").addEventListener("submit", submitForm);
+
+    // Update shop names and town names based on the selected route
+    document.getElementById("Route").addEventListener("change", updateOptions);
+
+    function updateOptions() {
+      let route = document.getElementById("Route").value;
+      let shopNameSelect = document.getElementById("ShopName");
+      let townSelect = document.getElementById("TownName");
+
+      // Clear existing options
+      shopNameSelect.innerHTML = '<option value="default">Select shop name from options</option>';
+      townSelect.innerHTML = '<option value="default">Select town from options</option>';
+
+      // Update options based on the selected route
+      if (route === "sikka") {
+        shopNameSelect.innerHTML += '<option value="kismatPan">Kismat Pan</option>';
+        townSelect.innerHTML += '<option value="town1">Town 1 for Sikka</option>';
+        townSelect.innerHTML += '<option value="town2">Town 2 for Sikka</option>';
+        // Add more options as needed
+      } else if (route === "upleta") {
+        shopNameSelect.innerHTML += '<option value="momaiKrupa">Momai Krupa Enterprise</option>';
+        townSelect.innerHTML += '<option value="town3">Town 3 for Upleta</option>';
+        townSelect.innerHTML += '<option value="town4">Town 4 for Upleta</option>';
+        // Add more options as needed
+      }
+    }
+
+    function thankyou() {
+      var newPageUrl = 'thankyou.html';
+      window.open(newPageUrl, '_blank');
+    }
+
+    function submitForm(e) {
+      e.preventDefault();
+
+      let SalesmenName = getInputValue("SalesmenName");
+      let Route = getInputValue("Route");
+      let TownName = getInputValue("TownName");
+      let ShopName = getInputValue("ShopName");
+      let Item = getInputValue("Item");
+      let OrderQuantity = getInputValue("OrderQuantity");
+
+      if (Route === "default" || ShopName === "default" || TownName === "default" || Item === "default") {
+        alert("Please select valid options before sending the data.");
+        return;
+      }
+
+      let type = OrderQuantity >= 5 ? "Wholesale" : "Retail";
+
+      saveSalesmanData(SalesmenName, Route, ShopName, TownName, Item, OrderQuantity, type);
+
+      document.querySelector(".alert").style.display = "block";
+
+      setTimeout(() => {
+        document.querySelector(".alert").style.display = "none";
+        thankyou();
+      }, 2000);
+
+      if (type === "Wholesale") {
+        alert("The Order Is Wholesale");
+      } else {
+        alert("The Order Is Retail");
+      }
+
+      document.getElementById("control-form").reset();
+    }
+
+    function getInputValue(id) {
+      return document.getElementById(id).value;
+    }
+
+    function saveSalesmanData(salesmenName, route, shopName, townName, item, orderQuantity, type) {
+      let newSalesmanRef = salesmenRef.push();
+      newSalesmanRef.set({
+        salesmenName: salesmenName,
+        route: route,
+        shopName: shopName,
+        townName: townName,
+        item: item,
+        orderQuantity: orderQuantity,
+        type: type,
+      });
+    }
+
+    // p5.js Camera Capture Integration
+    function setup() {
+      let canvas = createCanvas(200, 150);
+      canvas.id('cameraCanvas');
+      capture = createCapture(VIDEO);
+      capture.size(200, 150);
+      capture.id('userCapture');
+      capture.hide();
+    }
+  </script>
+
+</body>
+
+</html>
